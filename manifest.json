@@ -1,0 +1,11 @@
+{
+	"id": "image-editor-obsidian-plugin",
+	"name": "Image Editor",
+	"version": "0.1.0",
+	"minAppVersion": "0.15.0",
+	"description": "Formatter for image on page",
+	"author": "Andrey Serov",
+	"authorUrl": "https://github.com/Hosstell",
+	"fundingUrl": "https://github.com/Hosstell",
+	"isDesktopOnly": false
+}
