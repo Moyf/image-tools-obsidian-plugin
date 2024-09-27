@@ -6,11 +6,7 @@ import {
 } from "@codemirror/view";
 import {Plugin} from "obsidian";
 
-class ExamplePlugin implements PluginValue {
-	constructor(view: EditorView) {
-		// ...
-	}
-
+class AlignImage implements PluginValue {
 	update(update: ViewUpdate) {
 		const images = update.view.dom.getElementsByTagName("img")
 		Array.from(images).forEach(img => {
@@ -29,15 +25,11 @@ class ExamplePlugin implements PluginValue {
 		div.style.right = "0px"
 		item.parentNode?.append(div)
 	}
-
-	destroy() {
-		// ...
-	}
 }
 
 
-export default class MainPlugin extends Plugin {
+export default class extends Plugin {
 	onload() {
-		this.registerEditorExtension([ViewPlugin.fromClass(ExamplePlugin)]);
+		this.registerEditorExtension([ViewPlugin.fromClass(AlignImage)]);
 	}
 }
