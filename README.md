@@ -1,1 +1,1 @@
-# image-editor-obsidian-plugin
+# image-editor-obsidian-plugin + 1
