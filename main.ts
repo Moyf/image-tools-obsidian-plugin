@@ -29,8 +29,14 @@ class AlignImage implements PluginValue {
 			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/align-right.png?raw=true"
 		))
 
-		item.parentNode.addEventListener('mouseover', () => iconsContainer.style.display = 'block')
+		item.parentNode.addEventListener('mouseover', () => {
+			const left = Math.min(item.parentNode.clientWidth, item.width)
+			iconsContainer.style.display = 'block'
+			iconsContainer.style.left = (left - 93) + "px"
+		})
 		item.parentNode.addEventListener('mouseout', () => iconsContainer.style.display = 'none')
+		item.parentNode.addEventListener('change', () => console.log("hello"))
+		item.addEventListener('change', () => console.log("hello"))
 		item.parentNode?.append(iconsContainer)
 	}
 
