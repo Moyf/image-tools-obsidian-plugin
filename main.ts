@@ -1,9 +1,4 @@
-import {
-	ViewUpdate,
-	PluginValue,
-	EditorView,
-	ViewPlugin,
-} from "@codemirror/view";
+import {PluginValue, ViewPlugin, ViewUpdate,} from "@codemirror/view";
 import {Plugin} from "obsidian";
 
 class AlignImage implements PluginValue {
@@ -17,13 +12,46 @@ class AlignImage implements PluginValue {
 	}
 
 	addIcons(item: any) {
-		const div = document.createElement("div")
-		div.className = "icon-some-name"
-		div.innerText = "some text"
-		div.style.position = "absolute"
-		div.style.top = "0px"
-		div.style.right = "0px"
-		item.parentNode?.append(div)
+		const iconsContainer = document.createElement("div")
+		iconsContainer.style.position = "absolute"
+		iconsContainer.style.top = "0px"
+		iconsContainer.style.right = "0px"
+		iconsContainer.style.display = 'none'
+		iconsContainer.className = "icon-some-name"
+
+		iconsContainer.append(this.createIconElement(
+			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/align-left.png?raw=true"
+		))
+		iconsContainer.append(this.createIconElement(
+			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/align-center.png?raw=true"
+		))
+		iconsContainer.append(this.createIconElement(
+			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/align-right.png?raw=true"
+		))
+
+		item.parentNode.addEventListener('mouseover', () => iconsContainer.style.display = 'block')
+		item.parentNode.addEventListener('mouseout', () => iconsContainer.style.display = 'none')
+		item.parentNode?.append(iconsContainer)
+	}
+
+	createIconElement(src: string) {
+		const icon = document.createElement("img")
+		icon.src = src
+		icon.style.backgroundColor = 'white';
+
+		icon.addEventListener('mouseover', () => {
+			icon.style.backgroundColor = '#d7e2ff';
+		});
+		icon.addEventListener('mouseout', () => {
+			icon.style.backgroundColor = 'white';
+		});
+
+		icon.style.height = "25px"
+		icon.style.padding = "5px"
+		icon.style.margin = "3px"
+		icon.style.borderRadius = "4px"
+		icon.style.cursor = "pointer"
+		return icon
 	}
 }
 
