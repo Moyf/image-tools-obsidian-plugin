@@ -3,10 +3,17 @@ import {Plugin} from "obsidian";
 
 class AlignImage implements PluginValue {
 	update(update: ViewUpdate) {
-		const images = update.view.dom.getElementsByTagName("img")
+		// const images = update.view.dom.getElementsByTagName("img")
+		const images = update.view.dom.getElementsByClassName("image-embed")
 		Array.from(images).forEach(img => {
-			if (img.parentElement && !img.parentElement.getElementsByClassName("icon-some-name").length) {
-				this.addIcons(img)
+			console.log(img)
+			// if (img.parentElement && !img.parentElement.getElementsByClassName("icon-some-name").length) {
+			console.log(img.children[0].tagName)
+			console.log(img.children[1]?.className)
+			console.log(!(img.children[1]?.className === "icon-some-name"))
+			if (img.children[0].tagName === "IMG" && !(img.children[1]?.className === "icon-some-name")) {
+				console.log("added")
+				this.addIcons(img.children[0])
 			}
 		})
 	}
@@ -16,7 +23,8 @@ class AlignImage implements PluginValue {
 		iconsContainer.style.position = "absolute"
 		iconsContainer.style.top = "0px"
 		iconsContainer.style.right = "0px"
-		iconsContainer.style.display = 'none'
+		iconsContainer.style.transition = "0.1s"
+		iconsContainer.style.opacity = '0'
 		iconsContainer.className = "icon-some-name"
 
 		iconsContainer.append(this.createIconElement(
@@ -31,10 +39,10 @@ class AlignImage implements PluginValue {
 
 		item.parentNode.addEventListener('mouseover', () => {
 			const left = Math.min(item.parentNode.clientWidth, item.width)
-			iconsContainer.style.display = 'block'
+			iconsContainer.style.opacity = '1'
 			iconsContainer.style.left = (left - 93) + "px"
 		})
-		item.parentNode.addEventListener('mouseout', () => iconsContainer.style.display = 'none')
+		item.parentNode.addEventListener('mouseout', () => iconsContainer.style.opacity = '0')
 		item.parentNode.addEventListener('change', () => console.log("hello"))
 		item.addEventListener('change', () => console.log("hello"))
 		item.parentNode?.append(iconsContainer)
