@@ -1,13 +1,87 @@
 import {PluginValue, ViewPlugin, ViewUpdate,} from "@codemirror/view";
 import {Plugin} from "obsidian";
 
+
+class ImageText {
+	text: string
+	img: string | undefined
+	align: string | undefined
+	width: string | undefined
+
+	constructor(text: string) {
+		this.text = text
+		const params = text.split("|")
+		this.img = params[0]
+
+		if (params.length == 3) {
+			this.align = params[1]
+			this.width = params[2]
+			return
+		}
+
+		if (params.length == 2) {
+			if (params[1] == "left" || params[1] == "center" || params[1] == "right") {
+				this.align = params[1]
+			} else {
+				this.width = params[1]
+			}
+		}
+	}
+
+	setWidth(newWidth: string) {
+		this.width = newWidth
+	}
+
+	setAlign(newAlign: string) {
+		this.align = newAlign
+	}
+
+	getImageText() {
+		let output = this.img
+		if (this.align !== undefined) {
+			output += "|" + this.align
+		}
+		if (this.width !== undefined) {
+			output += "|" + this.width
+		}
+		return output
+	}
+}
+
+class MDText {
+	text: string
+
+	constructor(text: string) {
+		this.text = text
+	}
+
+	getImageIndexes(imgText: string) {
+		const indexStart = this.text.indexOf(`![[${imgText}`) + 3
+		let indexEnd = indexStart
+		for (let i = indexStart + 1; i < this.text.length; i++) {
+			if (this.text[i] === "]" && this.text[i+1] === "]") {
+				indexEnd = i
+				break
+			}
+		}
+		return [indexStart, indexEnd]
+	}
+
+	getImageText(imgText: string) {
+		const [indexStart, indexEnd] = this.getImageIndexes(imgText)
+		return new ImageText(this.text.slice(indexStart, indexEnd))
+	}
+}
+
 class AlignImage implements PluginValue {
 	alignIconsClassName = "align-icons-class-name"
 	resizeIconClassName = "resize-icon-class-name"
 	viewUpdate: ViewUpdate
+	mdText: MDText
 
 	update(update: ViewUpdate) {
 		this.viewUpdate = update
+		this.mdText = new MDText(update.state.doc.toString())
 
 		const images = update.view.dom.getElementsByClassName("image-embed")
 
@@ -22,6 +96,14 @@ class AlignImage implements PluginValue {
 			if (img.children[0].tagName === "IMG" && !(img.children[2]?.className === this.resizeIconClassName)) {
 				console.log("added resize buttons to image")
 				this.addResizeIcon(img.children[0])
+			}
+		})
+
+		Array.from(images).forEach((img: any) => {
+			if (!img.style.textAlign) {
+				console.log("Hey")
+				const imageText = this.mdText.getImageText(img.getAttribute("src"))
+				img.style.textAlign = imageText.align
 			}
 		})
 	}
@@ -101,7 +183,6 @@ class AlignImage implements PluginValue {
 		icon.className = this.resizeIconClassName
 
 		item.parentNode.addEventListener('mousemove', () => {
-			console.log("Hello")
 			const left = Math.min(item.parentNode.clientWidth, item.width)
 			icon.style.opacity = '1'
 			icon.style.left = (left - 17) + "px"
@@ -136,10 +217,8 @@ class AlignImage implements PluginValue {
 
 	setNewWidthForImage(img: any, newWidth: number) {
 		const imgName = img.parentNode.getAttribute("src")
-		const text = this.viewUpdate.state.doc.toString()
-		const [indexStart, indexEnd] = this.getIndexes(text, imgName)
-
-		let imageText = new ImageText(text.slice(indexStart, indexEnd))
+		let imageText = this.mdText.getImageText(imgName)
+		let [indexStart, indexEnd] = this.mdText.getImageIndexes(imgName)
 		imageText.setWidth(newWidth.toString())
 
 		const changes = this.viewUpdate.state.update({
@@ -151,73 +230,14 @@ class AlignImage implements PluginValue {
 	setNewAlignForImage(img: any, newAlign: string) {
 		const imgName = img.parentNode.getAttribute("src")
 		const text = this.viewUpdate.state.doc.toString()
-		const [indexStart, indexEnd] = this.getIndexes(text, imgName)
-
-		let imageText = new ImageText(text.slice(indexStart, indexEnd))
+		let imageText = this.mdText.getImageText(imgName)
+		let [indexStart, indexEnd] = this.mdText.getImageIndexes(imgName)
 		imageText.setAlign(newAlign)
 
 		const changes = this.viewUpdate.state.update({
 			changes: {from: indexStart, to: indexEnd, insert: imageText.getImageText()}
 		})
 		this.viewUpdate.view.dispatch(changes)
-	}
-
-	getIndexes(text: string, imgText: string) {
-		const indexStart = text.indexOf(`![[${imgText}`) + 3
-		let indexEnd = indexStart
-		for (let i = indexStart + 1; i < text.length; i++) {
-			if (text[i] === "]" && text[i+1] === "]") {
-				indexEnd = i
-				break
-			}
-		}
-		return [indexStart, indexEnd]
-	}
-}
-
-class ImageText {
-	text: string
-	img: string | undefined
-	align: string | undefined
-	width: string | undefined
-
-	constructor(text: string) {
-		this.text = text
-		const params = text.split("|")
-		this.img = params[0]
-
-		if (params.length == 3) {
-			this.align = params[1]
-			this.width = params[2]
-			return
-		}
-
-		if (params.length == 2) {
-			if (params[1] == "left" || params[1] == "center" || params[1] == "right") {
-				this.align = params[1]
-			} else {
-				this.width = params[1]
-			}
-		}
-	}
-
-	setWidth(newWidth: string) {
-		this.width = newWidth
-	}
-
-	setAlign(newAlign: string) {
-		this.align = newAlign
-	}
-
-	getImageText() {
-		let output = this.img
-		if (this.align !== undefined) {
-			output += "|" + this.align
-		}
-		if (this.width !== undefined) {
-			output += "|" + this.width
-		}
-		return output
 	}
 }
 
