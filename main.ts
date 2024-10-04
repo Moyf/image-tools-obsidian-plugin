@@ -75,7 +75,8 @@ class MDText {
 
 class AlignImage implements PluginValue {
 	alignIconsClassName = "align-icons-class-name"
-	resizeIconClassName = "resize-icon-class-name"
+	rightResizeIconClassName = "right-resize-icon-class-name"
+	leftResizeIconClassName = "left-resize-icon-class-name"
 	viewUpdate: ViewUpdate
 	mdText: MDText
 
@@ -87,21 +88,24 @@ class AlignImage implements PluginValue {
 
 		Array.from(images).forEach(img => {
 			if (img.children[0].tagName === "IMG" && !(img.children[1]?.className === this.alignIconsClassName)) {
-				console.log("added align buttons to image")
 				this.addAlignIcons(img.children[0])
 			}
 		})
 
 		Array.from(images).forEach(img => {
-			if (img.children[0].tagName === "IMG" && !(img.children[2]?.className === this.resizeIconClassName)) {
-				console.log("added resize buttons to image")
-				this.addResizeIcon(img.children[0])
+			if (img.children[0].tagName === "IMG" && !(img.children[2]?.className === this.rightResizeIconClassName)) {
+				this.addRightResizeIcon(img.children[0])
+			}
+		})
+
+		Array.from(images).forEach(img => {
+			if (img.children[0].tagName === "IMG" && !(img.children[3]?.className === this.leftResizeIconClassName)) {
+				this.addLeftResizeIcon(img.children[0])
 			}
 		})
 
 		Array.from(images).forEach((img: any) => {
 			if (!img.style.textAlign) {
-				console.log("Hey")
 				const imageText = this.mdText.getImageText(img.getAttribute("src"))
 				img.style.textAlign = imageText.align
 			}
@@ -168,24 +172,26 @@ class AlignImage implements PluginValue {
 		return icon
 	}
 
-	addResizeIcon(item: any) {
+	addRightResizeIcon(item: any) {
 		const icon = document.createElement("div")
 		icon.style.position = "absolute"
 		icon.style.bottom = "8px"
 		icon.style.right = "0px"
-		icon.style.width = "15px"
-		icon.style.height = "15px"
+		icon.style.width = "8px"
+		icon.style.height = "70px"
+		icon.style.top = "calc(50% - 35px)"
 		icon.style.backgroundColor = "white"
 		icon.style.borderRadius = "10px"
 		icon.style.border = "2px solid grey"
 		icon.style.opacity = '0'
-		icon.style.cursor = 'nwse-resize'
-		icon.className = this.resizeIconClassName
+		icon.style.cursor = 'ew-resize'
+		icon.className = this.rightResizeIconClassName
 
 		item.parentNode.addEventListener('mousemove', () => {
-			const left = Math.min(item.parentNode.clientWidth, item.width)
+			const width = Math.min(item.parentNode.clientWidth, item.width)
+			const left = width + item.getBoundingClientRect().left - item.parentNode.getBoundingClientRect().left
 			icon.style.opacity = '1'
-			icon.style.left = (left - 17) + "px"
+			icon.style.left = (left - 12) + "px"
 		})
 		item.parentNode.addEventListener('mouseout', () => icon.style.opacity = '0')
 
@@ -199,6 +205,54 @@ class AlignImage implements PluginValue {
 
 			const mousemove = (e: any) => {
 				const newWidth = startWidth + e.clientX - startX
+				this.setNewWidthForImage(item, newWidth)
+				item.setAttribute("width", `${newWidth}px`)
+			}
+
+			const mouseup = (e: any) => {
+				document.documentElement.removeEventListener('mousemove', mousemove, false);
+				document.documentElement.removeEventListener('mouseup', mouseup, false);
+			}
+
+			document.documentElement.addEventListener('mousemove', mousemove, false);
+			document.documentElement.addEventListener('mouseup', mouseup, false);
+		})
+
+		item.parentNode?.append(icon)
+	}
+
+	addLeftResizeIcon(item: any) {
+		const icon = document.createElement("div")
+		icon.style.position = "absolute"
+		icon.style.bottom = "8px"
+		icon.style.right = "0px"
+		icon.style.width = "8px"
+		icon.style.height = "70px"
+		icon.style.top = "calc(50% - 35px)"
+		icon.style.backgroundColor = "white"
+		icon.style.borderRadius = "10px"
+		icon.style.border = "2px solid grey"
+		icon.style.opacity = '0'
+		icon.style.cursor = 'ew-resize'
+		icon.className = this.leftResizeIconClassName
+
+		item.parentNode.addEventListener('mousemove', () => {
+			const left = item.getBoundingClientRect().left - item.parentNode.getBoundingClientRect().left
+			icon.style.opacity = '1'
+			icon.style.left = (left + 3) + "px"
+		})
+		item.parentNode.addEventListener('mouseout', () => icon.style.opacity = '0')
+
+		icon.addEventListener("mousedown", (e) => {
+			const startX = e.clientX;
+
+			let startWidth = 0
+			if (document.defaultView) {
+				startWidth = parseInt(document?.defaultView?.getComputedStyle(item).width, 10);
+			}
+
+			const mousemove = (e: any) => {
+				const newWidth = startWidth - e.clientX + startX
 				this.setNewWidthForImage(item, newWidth)
 				item.setAttribute("width", `${newWidth}px`)
 			}
