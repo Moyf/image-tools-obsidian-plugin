@@ -173,17 +173,7 @@ class AlignImage implements PluginValue {
 	}
 
 	addRightResizeIcon(item: any) {
-		const icon = document.createElement("div")
-		icon.style.position = "absolute"
-		icon.style.bottom = "8px"
-		icon.style.right = "0px"
-		icon.style.width = "8px"
-		icon.style.height = "70px"
-		icon.style.top = "calc(50% - 35px)"
-		icon.style.backgroundColor = "white"
-		icon.style.borderRadius = "10px"
-		icon.style.border = "2px solid grey"
-		icon.style.opacity = '0'
+		const icon = this.createResizeIcon()
 		icon.style.cursor = 'ew-resize'
 		icon.className = this.rightResizeIconClassName
 
@@ -222,17 +212,7 @@ class AlignImage implements PluginValue {
 	}
 
 	addLeftResizeIcon(item: any) {
-		const icon = document.createElement("div")
-		icon.style.position = "absolute"
-		icon.style.bottom = "8px"
-		icon.style.right = "0px"
-		icon.style.width = "8px"
-		icon.style.height = "70px"
-		icon.style.top = "calc(50% - 35px)"
-		icon.style.backgroundColor = "white"
-		icon.style.borderRadius = "10px"
-		icon.style.border = "2px solid grey"
-		icon.style.opacity = '0'
+		const icon = this.createResizeIcon()
 		icon.style.cursor = 'ew-resize'
 		icon.className = this.leftResizeIconClassName
 
@@ -267,6 +247,21 @@ class AlignImage implements PluginValue {
 		})
 
 		item.parentNode?.append(icon)
+	}
+
+	createResizeIcon() {
+		const icon = document.createElement("div")
+		icon.style.position = "absolute"
+		icon.style.bottom = "8px"
+		icon.style.right = "0px"
+		icon.style.width = "8px"
+		icon.style.height = "70px"
+		icon.style.top = "calc(50% - 35px)"
+		icon.style.backgroundColor = "white"
+		icon.style.borderRadius = "10px"
+		icon.style.border = "2px solid grey"
+		icon.style.opacity = '0'
+		return icon
 	}
 
 	setNewWidthForImage(img: any, newWidth: number) {
