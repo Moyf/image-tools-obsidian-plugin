@@ -1,28 +1,19 @@
 import {PluginValue, ViewUpdate} from "@codemirror/view";
-import MDText from "./md-text";
 
 export default class ZoomIconItem implements PluginValue {
 	zoomIconsClassName = "zoom-icons-class-name"
 	viewUpdate: ViewUpdate
-	mdText: MDText
 
 	update(update: ViewUpdate) {
 		this.viewUpdate = update
-		this.mdText = new MDText(update.state.doc.toString())
 		const images = update.view.dom.getElementsByClassName("image-embed")
 
 		Array.from(images).forEach(img => {
-			if (img.children[0].tagName === "IMG" && !(img.children[1]?.className === this.zoomIconsClassName)) {
+			const classes = Array.from(img.children).map(x => x.className)
+			if (img.children[0].tagName === "IMG" && !(classes.includes(this.zoomIconsClassName))) {
 				this.addZoomIcon(img.children[0])
 			}
 		})
-
-		// Array.from(images).forEach((img: any) => {
-		// 	if (!img.style.textAlign) {
-		// 		const imageText = this.mdText.getImageText(img.getAttribute("src"))
-		// 		img.style.textAlign = imageText.align
-		// 	}
-		// })
 	}
 
 	addZoomIcon(item: any) {
@@ -34,19 +25,20 @@ export default class ZoomIconItem implements PluginValue {
 		iconsContainer.className = this.zoomIconsClassName
 
 		iconsContainer.append(this.createIconElement(
-			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/zoom.png?raw=true"
+			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/zoom.png?raw=true",
+			() => this.openImageDialog(item, item.parentNode)
 		))
 
 		item.parentNode.addEventListener('mousemove', () => {
-			const left = Math.min(item.parentNode.clientWidth, item.width)
 			iconsContainer.style.opacity = '1'
-			// iconsContainer.style.left = (left - 93) + "px"
+			const left = item.getBoundingClientRect().left - item.parentNode.getBoundingClientRect().left
+			iconsContainer.style.left = (left + 3) + "px"
 		})
 		item.parentNode.addEventListener('mouseout', () => iconsContainer.style.opacity = '0')
 		item.parentNode?.append(iconsContainer)
 	}
 
-	createIconElement(src: string) {
+	createIconElement(src: string, clickEvent: any) {
 		const icon = document.createElement("img")
 		icon.src = src
 		icon.style.backgroundColor = 'white';
@@ -57,7 +49,7 @@ export default class ZoomIconItem implements PluginValue {
 		icon.addEventListener('mouseout', () => {
 			icon.style.backgroundColor = 'white';
 		});
-		// icon.addEventListener("click", clickEvent)
+		icon.addEventListener("click", clickEvent)
 
 		icon.style.height = "25px"
 		icon.style.padding = "5px"
@@ -67,16 +59,39 @@ export default class ZoomIconItem implements PluginValue {
 		return icon
 	}
 
-	setNewAlignForImage(img: any, newAlign: string) {
-		const imgName = img.parentNode.getAttribute("src")
-		const text = this.viewUpdate.state.doc.toString()
-		let imageText = this.mdText.getImageText(imgName)
-		let [indexStart, indexEnd] = this.mdText.getImageIndexes(imgName)
-		imageText.setAlign(newAlign)
+	openImageDialog(image: any, parent: any) {
+		console.log("openImageDialog")
 
-		const changes = this.viewUpdate.state.update({
-			changes: {from: indexStart, to: indexEnd, insert: imageText.getImageText()}
-		})
-		this.viewUpdate.view.dispatch(changes)
+		const imageContainer = document.createElement("dialog")
+		imageContainer.style.position = "absolute"
+		imageContainer.style.width = "100%"
+		imageContainer.style.height = "100%"
+		imageContainer.style.border = "0"
+		imageContainer.style.backgroundColor = "#ffffff00"
+		imageContainer.style.textAlign = "center"
+		imageContainer.style.display = "flex"
+		imageContainer.style.justifyContent = "center"
+		imageContainer.style.alignItems = "center"
+
+		imageContainer.addEventListener("click", imageContainer.remove)
+
+		const img = document.createElement("img")
+		img.src = image.src
+		img.style.borderRadius = "10px"
+		img.style.border = "2px solid white"
+		// TODO: Относительно выбранной темы (темная\светлая) определять цвет границы
+		// img.style.border = "2px solid grey"
+		img.style.maxHeight = "100%"
+		img.style.maxWidth = "100%"
+
+		if (image.clientHeight > image.clientWidth) {
+			img.style.minHeight = "-webkit-fill-available"
+		} else {
+			img.style.minWidth = "-webkit-fill-available"
+		}
+
+		imageContainer.append(img)
+		parent.append(imageContainer)
+		imageContainer.showModal()
 	}
 }

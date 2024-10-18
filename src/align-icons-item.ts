@@ -12,7 +12,8 @@ export default class AlignIconsItem implements PluginValue {
 		const images = update.view.dom.getElementsByClassName("image-embed")
 
 		Array.from(images).forEach(img => {
-			if (img.children[0].tagName === "IMG" && !(img.children[1]?.className === this.alignIconsClassName)) {
+			const classes = Array.from(img.children).map(x => x.className)
+			if (img.children[0].tagName === "IMG" && !(classes.includes(this.alignIconsClassName))) {
 				this.addAlignIcons(img.children[0])
 			}
 		})
