@@ -8,5 +8,5 @@ With this plugin, you can:
 • Open images in full screen for a better view  
 
 
-### Result
+### Example
 ![](static/result.gif)
