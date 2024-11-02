@@ -8,5 +8,5 @@ With this plugin, you can:
 • Open images in full screen for a better view  
 
 
-### Example
-![](static/result.gif)
+### Example:
+![](https://raw.githubusercontent.com/Hosstell/image-tools-obsidian-plugin/refs/heads/main/static/result.gif)
