@@ -2,8 +2,8 @@ import {PluginValue, ViewUpdate} from "@codemirror/view";
 import MDText from "./md-text";
 
 export default class ResizeIconsItem implements PluginValue {
-	rightResizeIconClassName = "right-resize-icon-class-name"
-	leftResizeIconClassName = "left-resize-icon-class-name"
+	rightResizeIconClassName = "right-resize-icon-class-name image-tools-resize-item image-tools-resize-item-right"
+	leftResizeIconClassName = "left-resize-icon-class-name image-tools-resize-item image-tools-resize-item-left"
 	viewUpdate: ViewUpdate
 	mdText: MDText
 
@@ -25,27 +25,11 @@ export default class ResizeIconsItem implements PluginValue {
 				this.addLeftResizeIcon(img.children[0])
 			}
 		})
-
-		Array.from(images).forEach((img: any) => {
-			if (!img.style.textAlign) {
-				const imageText = this.mdText.getImageText(img.getAttribute("src"))
-				img.style.textAlign = imageText.align
-			}
-		})
 	}
 
 	addRightResizeIcon(item: any) {
-		const icon = this.createResizeIcon()
-		icon.style.cursor = 'ew-resize'
+		const icon = document.createElement("div")
 		icon.className = this.rightResizeIconClassName
-
-		item.parentNode.addEventListener('mousemove', () => {
-			const width = Math.min(item.parentNode.clientWidth, item.width)
-			const left = width + item.getBoundingClientRect().left - item.parentNode.getBoundingClientRect().left
-			icon.style.opacity = '1'
-			icon.style.left = (left - 12) + "px"
-		})
-		item.parentNode.addEventListener('mouseout', () => icon.style.opacity = '0')
 
 		icon.addEventListener("mousedown", (e) => {
 			const startX = e.clientX;
@@ -74,16 +58,8 @@ export default class ResizeIconsItem implements PluginValue {
 	}
 
 	addLeftResizeIcon(item: any) {
-		const icon = this.createResizeIcon()
-		icon.style.cursor = 'ew-resize'
+		const icon = document.createElement("div")
 		icon.className = this.leftResizeIconClassName
-
-		item.parentNode.addEventListener('mousemove', () => {
-			const left = item.getBoundingClientRect().left - item.parentNode.getBoundingClientRect().left
-			icon.style.opacity = '1'
-			icon.style.left = (left + 3) + "px"
-		})
-		item.parentNode.addEventListener('mouseout', () => icon.style.opacity = '0')
 
 		icon.addEventListener("mousedown", (e) => {
 			const startX = e.clientX;
@@ -109,21 +85,6 @@ export default class ResizeIconsItem implements PluginValue {
 		})
 
 		item.parentNode?.append(icon)
-	}
-
-	createResizeIcon() {
-		const icon = document.createElement("div")
-		icon.style.position = "absolute"
-		icon.style.bottom = "8px"
-		icon.style.right = "0px"
-		icon.style.width = "8px"
-		icon.style.height = "70px"
-		icon.style.top = "calc(50% - 35px)"
-		icon.style.backgroundColor = "white"
-		icon.style.borderRadius = "10px"
-		icon.style.border = "2px solid grey"
-		icon.style.opacity = '0'
-		return icon
 	}
 
 	setNewWidthForImage(img: any, newWidth: number) {

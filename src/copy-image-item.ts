@@ -1,7 +1,7 @@
 import {PluginValue, ViewUpdate} from "@codemirror/view";
 
 export default class CopyImageItem implements PluginValue {
-	copyImageClassName = "copy-image-class-name"
+	copyImageClassName = "copy-icon-container image-tools-icons-container image-tools-copy-icon"
 	viewUpdate: ViewUpdate
 
 	update(update: ViewUpdate) {
@@ -18,10 +18,6 @@ export default class CopyImageItem implements PluginValue {
 
 	addCopyImageIcon(item: any) {
 		const iconsContainer = document.createElement("div")
-		iconsContainer.style.position = "absolute"
-		iconsContainer.style.top = "0px"
-		iconsContainer.style.left = "0px"
-		iconsContainer.style.opacity = '0'
 		iconsContainer.className = this.copyImageClassName
 
 		iconsContainer.append(this.createIconElement(
@@ -29,33 +25,14 @@ export default class CopyImageItem implements PluginValue {
 			() => this.copyImage(item.src)
 		))
 
-		item.parentNode.addEventListener('mousemove', () => {
-			iconsContainer.style.opacity = '1'
-			const left = item.getBoundingClientRect().left - item.parentNode.getBoundingClientRect().left
-			iconsContainer.style.left = (left + 32) + "px"
-		})
-		item.parentNode.addEventListener('mouseout', () => iconsContainer.style.opacity = '0')
 		item.parentNode?.append(iconsContainer)
 	}
 
 	createIconElement(src: string, clickEvent: any) {
 		const icon = document.createElement("img")
 		icon.src = src
-		icon.style.backgroundColor = 'white';
-
-		icon.addEventListener('mouseover', () => {
-			icon.style.backgroundColor = '#d7e2ff';
-		});
-		icon.addEventListener('mouseout', () => {
-			icon.style.backgroundColor = 'white';
-		});
+		icon.className = 'image-tools-icon';
 		icon.addEventListener("click", clickEvent)
-
-		icon.style.height = "25px"
-		icon.style.padding = "5px"
-		icon.style.margin = "3px"
-		icon.style.borderRadius = "4px"
-		icon.style.cursor = "pointer"
 		return icon
 	}
 

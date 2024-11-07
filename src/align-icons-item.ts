@@ -2,92 +2,77 @@ import {PluginValue, ViewUpdate} from "@codemirror/view";
 import MDText from "./md-text";
 
 export default class AlignIconsItem implements PluginValue {
-	alignIconsClassName = "align-icons-class-name"
+	alignIconsClassName = "align-icons-class-name image-tools-icons-container image-tools-icons-container-right"
 	viewUpdate: ViewUpdate
 	mdText: MDText
 
 	update(update: ViewUpdate) {
 		this.viewUpdate = update
 		this.mdText = new MDText(update.state.doc.toString())
-		const images = update.view.dom.getElementsByClassName("image-embed")
-
-		Array.from(images).forEach(img => {
-			const classes = Array.from(img.children).map(x => x.className)
-			if (img.children[0].tagName === "IMG" && !(classes.includes(this.alignIconsClassName))) {
-				this.addAlignIcons(img.children[0])
+		const imageContainerDivs = update.view.dom.getElementsByClassName("image-embed")
+		
+		Array.from(imageContainerDivs).forEach((imageContainerDiv: any) => {
+			const img = imageContainerDiv.children[0]
+			
+			const classes = Array.from(imageContainerDiv.children).map((x: any) => x.className)
+			if (imageContainerDiv.children[0].tagName === "IMG" && !(classes.includes(this.alignIconsClassName))) {
+				this.addAlignIcons(img)
 			}
-		})
 
-		Array.from(images).forEach((img: any) => {
-			if (!img.style.textAlign) {
-				const imageText = this.mdText.getImageText(img.getAttribute("src"))
-				img.style.textAlign = imageText.align
+			if (!imageContainerDiv.className.includes("images-tools-text-align-")) {
+				const textAlignClassName = "images-tools-text-align-" + this.mdText.getImageText(img.getAttribute("src")).align
+				imageContainerDiv.classList.add(textAlignClassName)
 			}
 		})
 	}
 
-	addAlignIcons(item: any) {
+	addAlignIcons(img: any) {
+		const imgParent = img.parentNode
+
 		const iconsContainer = document.createElement("div")
-		iconsContainer.style.position = "absolute"
-		iconsContainer.style.top = "0px"
-		iconsContainer.style.right = "0px"
-		iconsContainer.style.opacity = '0'
 		iconsContainer.className = this.alignIconsClassName
 
 		iconsContainer.append(this.createIconElement(
 			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/align-left.png?raw=true",
 			() => {
-				this.setNewAlignForImage(item, "left")
-				item.parentNode.style.textAlign = "left"
+				this.setNewAlignForImage(img, "left")
+				imgParent.classList.remove("images-tools-text-align-right")
+				imgParent.classList.remove("images-tools-text-align-center")
+				imgParent.classList.add("images-tools-text-align-left")
 			}
 		))
 		iconsContainer.append(this.createIconElement(
 			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/align-center.png?raw=true",
 			() => {
-				this.setNewAlignForImage(item, "center")
-				item.parentNode.style.textAlign = "center"
+				this.setNewAlignForImage(img, "center")
+				imgParent.classList.remove("images-tools-text-align-right")
+				imgParent.classList.remove("images-tools-text-align-left")
+				imgParent.classList.add("images-tools-text-align-center")
 			}
 		))
 		iconsContainer.append(this.createIconElement(
 			"https://github.com/Hosstell/image-editor-obsidian-plugin/blob/main/static/align-right.png?raw=true",
 			() => {
-				this.setNewAlignForImage(item, "right")
-				item.parentNode.style.textAlign = "right"
+				this.setNewAlignForImage(img, "right")
+				imgParent.classList.remove("images-tools-text-align-center")
+				imgParent.classList.remove("images-tools-text-align-left")
+				imgParent.classList.add("images-tools-text-align-right")
 			}
 		))
 
-		item.parentNode.addEventListener('mousemove', () => {
-			const left = Math.min(item.parentNode.clientWidth, item.width)
-			iconsContainer.style.opacity = '1'
-			iconsContainer.style.left = (left - 93) + "px"
-		})
-		item.parentNode.addEventListener('mouseout', () => iconsContainer.style.opacity = '0')
-		item.parentNode?.append(iconsContainer)
+		imgParent.append(iconsContainer)
 	}
 
 	createIconElement(src: string, clickEvent: any) {
 		const icon = document.createElement("img")
 		icon.src = src
-		icon.style.backgroundColor = 'white';
-
-		icon.addEventListener('mouseover', () => {
-			icon.style.backgroundColor = '#d7e2ff';
-		});
-		icon.addEventListener('mouseout', () => {
-			icon.style.backgroundColor = 'white';
-		});
+		icon.className = 'image-tools-icon';
 		icon.addEventListener("click", clickEvent)
-
-		icon.style.height = "25px"
-		icon.style.padding = "5px"
-		icon.style.margin = "3px"
-		icon.style.borderRadius = "4px"
-		icon.style.cursor = "pointer"
 		return icon
 	}
 
 	setNewAlignForImage(img: any, newAlign: string) {
-		const imgName = img.parentNode.getAttribute("src")
+		const imgName = img.parentNode.parentNode.getAttribute("src")
 		const text = this.viewUpdate.state.doc.toString()
 		let imageText = this.mdText.getImageText(imgName)
 		let [indexStart, indexEnd] = this.mdText.getImageIndexes(imgName)
