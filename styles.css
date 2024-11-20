@@ -30,7 +30,7 @@
 }
 
 .image-tools-icon {
-  background-color: white;
+  background-color: var(--background-secondary);
   height: 28px;
 	width: 28px;
 	color: #000000ba;
